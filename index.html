@@ -1,0 +1,1684 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MARCK BUSINESS</title>
+
+<style>
+:root{
+  --green:#25D366; --dark:#121212; --dark-card:#1E1E1E; --light:#f4f4f4; --accent:#03dac6;
+}
+body{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+  background:var(--dark); color:var(--light); margin:0; padding:20px;
+}
+h2,h3{margin:0 0 10px 0;color:var(--green);}
+.card{
+  background:var(--dark-card);
+  border-radius:16px;
+  padding:20px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.5);
+  margin-bottom:20px;
+}
+label{font-size:0.85rem;color:#aaa;}
+input[type=text], input[type=number], input[type=date], select{
+  width:100%;padding:10px;margin:6px 0 12px 0;border-radius:10px;
+  border:1px solid #333;background:var(--dark);color:var(--light);box-sizing:border-box;
+}
+button{
+  background:var(--green); color:#fff; border:none;padding:10px 16px;
+  border-radius:12px; cursor:pointer; font-weight:700; transition:0.3s;
+}
+button:hover{background:var(--accent);}
+button:disabled{opacity:.55; cursor:not-allowed;}
+.danger{background:#e74c3c;}
+.danger:hover{background:#ff5252;}
+.ghost{background:#333;color:#fff;}
+.ghost:hover{background:#555;}
+ul.list{list-style:none;padding:0;margin:0;max-height:320px;overflow:auto;}
+ul.list li{display:flex;justify-content:space-between;gap:10px;padding:10px;border-bottom:1px solid #333;border-radius:8px;margin-bottom:6px;}
+table{width:100%;border-collapse:collapse;margin-top:10px;}
+table th, table td{padding:10px;text-align:left;border-bottom:1px solid #333;}
+.right{text-align:right;}
+.center{text-align:center;}
+.small-note{font-size:0.8rem;color:#888;}
+.flex-row{display:flex;gap:10px;align-items:center;}
+.flex-row input[type=text]{flex:1;}
+.big-input{font-size:1.3rem;padding:14px;}
+.big-button{font-size:1.2rem;padding:14px 18px;}
+.sub-card{background:#1A1A1A;border-radius:12px;padding:12px;margin-top:12px;}
+hr{border:none;border-top:1px solid #333;margin:14px 0;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media (max-width:700px){.grid2{grid-template-columns:1fr;}}
+.add-cart-btn{
+  background:#25D366;
+  border-radius:12px;
+  font-size:1.6rem;
+  width:60px;height:60px;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;cursor:pointer;transition:0.3s;position:relative;
+}
+.add-cart-btn:hover{background:#03dac6;}
+.add-cart-btn:hover::after{
+  content:'Agregar al carrito';
+  position:absolute;top:-30px;
+  background:#333;color:#fff;padding:4px 8px;
+  font-size:0.8rem;border-radius:4px;white-space:nowrap;
+}
+.pill{
+  display:inline-block;
+  padding:2px 8px;
+  border:1px solid #333;
+  border-radius:999px;
+  font-size:0.75rem;color:#ddd;
+}
+
+/* HEADER */
+.logo-header{
+  text-align:center;
+  margin-bottom:16px;
+  position:sticky;top:0;z-index:1000;
+  background:var(--dark);
+  padding:12px 0;
+}
+.logo-header img{max-width:150px; vertical-align:middle;}
+.logo-name{
+  display:inline-block;color:var(--green);font-weight:700;
+  font-size:1.05rem;margin-left:10px;vertical-align:middle;
+}
+
+/* ===== MENU HAMBURGUESA ===== */
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  max-width:1400px;
+  margin:0 auto 14px auto;
+}
+.topbar-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.hamburger{
+  width:44px; height:44px;
+  border-radius:12px;
+  background:#333;
+  color:#fff;
+  border:1px solid #444;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+}
+.hamburger:hover{background:#555;}
+.view-title{
+  font-weight:800;color:var(--green);letter-spacing:.3px;
+}
+.shell{max-width:1400px;margin:0 auto;position:relative;}
+.drawer-backdrop{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.55);
+  opacity:0;pointer-events:none;
+  transition:.2s;
+  z-index:2000;
+}
+.drawer{
+  position:fixed;top:0;left:0;
+  height:100%;width:320px;
+  background:var(--dark-card);
+  border-right:1px solid #333;
+  transform:translateX(-105%);
+  transition:.2s;
+  z-index:2001;
+  padding:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,.7);
+}
+.drawer.open{transform:translateX(0);}
+.drawer-backdrop.open{opacity:1;pointer-events:auto;}
+.drawer-header{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin-bottom:12px;
+}
+.drawer-header .brand{color:var(--green);font-weight:800;}
+.drawer-close{
+  width:40px;height:40px;border-radius:12px;
+  background:#333;color:#fff;border:1px solid #444;
+}
+.drawer-close:hover{background:#555;}
+.drawer-nav{display:flex;flex-direction:column;gap:10px;margin-top:10px;}
+.navbtn{
+  text-align:left;
+  background:#1A1A1A;
+  border:1px solid #333;
+  color:#fff;
+  padding:12px 12px;
+  border-radius:14px;
+  cursor:pointer;
+  font-weight:700;
+}
+.navbtn:hover{background:#222;}
+.navbtn.active{
+  background:#25D36622;
+  border-color:#25D36666;
+}
+.drawer-note{margin-top:14px;color:#aaa;font-size:.8rem;}
+
+.view{display:none;}
+.view.active{display:block;}
+
+.footer{
+  text-align:center;margin-top:20px;font-size:0.8rem;color:#888;
+}
+
+/* Overlay bloqueo (activación / pestaña duplicada / expiración) */
+.blocker{
+  position:fixed; inset:0; z-index:99999;
+  background:rgba(0,0,0,.75);
+  display:flex; align-items:center; justify-content:center;
+  padding:20px;
+}
+.blocker-card{
+  max-width:720px; width:100%;
+  background:#111; border:1px solid #333;
+  border-radius:18px; padding:20px;
+  box-shadow:0 20px 60px rgba(0,0,0,.7);
+}
+.blocker-card h2{margin:0 0 10px; color:var(--green);}
+.blocker-card p{margin:8px 0; color:#ddd; line-height:1.4;}
+.blocker-actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;}
+.blocker-actions button{flex:1; min-width:180px;}
+
+/* ✅ caja cambio */
+.cash-box{
+  margin-top:10px;
+  padding:10px;
+  border:1px dashed #333;
+  border-radius:12px;
+  background:#111;
+}
+.cash-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+@media (max-width:700px){.cash-grid{grid-template-columns:1fr;}}
+.cash-value{
+  font-size:1.2rem;
+  font-weight:900;
+  color:#fff;
+  margin-top:6px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="logo-header">
+  <img src="LOGO1.png" alt="Logo del sistema">
+  <span class="logo-name">MARCK BUSINESS</span>
+</div>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <button id="btnOpenMenu" class="hamburger" title="Menú">☰</button>
+    <div class="view-title" id="viewTitle">VENTA / CARRITO</div>
+  </div>
+  <div class="small-note">Soporte Tecnico +502 5814-0621.</div>
+</div>
+
+<div id="drawerBackdrop" class="drawer-backdrop"></div>
+<aside id="drawer" class="drawer" aria-hidden="true">
+  <div class="drawer-header">
+    <div class="brand">-</div>
+    <button id="btnCloseMenu" class="drawer-close" title="Cerrar">✕</button>
+  </div>
+
+  <div class="drawer-nav">
+    <button class="navbtn active" data-view="venta">🧾 Venta / Carrito</button>
+    <button class="navbtn" data-view="inventario">📦 Inventario</button>
+    <button class="navbtn" data-view="registro">📊 Registro + Cierre</button>
+  </div>
+
+  <div class="drawer-note">
+    MarckBusiness © 2026 — Todos los derechos reservados
+  </div>
+</aside>
+
+<div class="shell">
+
+  <!-- ===================== VIEW: VENTA ===================== -->
+  <section id="view-venta" class="view active">
+    <div class="card">
+
+      <div class="sub-card">
+        <h2>Buscar producto</h2>
+
+        <div class="flex-row" style="margin-bottom:8px;">
+          <input id="scanInput" type="text" placeholder="Escanear código de barras aquí..." class="big-input" autocomplete="off"/>
+          <button id="scanAddBtn" class="add-cart-btn" title="Agregar por código">+</button>
+        </div>
+        <p class="small-note" style="margin-top:-4px;">Tip: la mayoría de lectores envían <b>Enter</b> al final. Escanea y se agrega automáticamente.</p>
+
+        <hr>
+
+        <div class="flex-row">
+          <input id="filterInput" type="text" placeholder="Buscar producto..." list="productsDatalist" class="big-input"/>
+          <input id="filterQty" type="number" min="1" value="1" style="width:100px;" placeholder="Cant"/>
+          <button id="addFilterBtn" class="add-cart-btn">+</button>
+          <datalist id="productsDatalist"></datalist>
+        </div>
+
+        <div style="margin-top:8px;">
+          <label class="small-note">O seleccionar desde la lista:</label>
+          <select id="productSelect">
+            <option value="">-- Seleccionar producto --</option>
+          </select>
+        </div>
+        <p class="small-note">Selecciona producto y cantidad para agregar al carrito.</p>
+      </div>
+
+      <div class="sub-card">
+        <h2>Carrito / Venta</h2>
+
+        <table id="cartTable">
+          <thead>
+            <tr>
+              <th>Cant</th><th>Producto</th><th class="right">Precio</th><th class="right">Total</th><th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:10px;flex-wrap:wrap;">
+          <input id="clientName" placeholder="Cliente (opcional)" style="flex:1;min-width:220px;"/>
+
+          <div style="min-width:220px;flex:1;">
+            <label>Forma de pago</label>
+            <select id="payMethod">
+              <option value="EFECTIVO">EFECTIVO</option>
+              <option value="TARJETA">TARJETA</option>
+              <option value="TRANSFERENCIA">TRANSFERENCIA</option>
+            </select>
+          </div>
+
+          <div class="right" style="min-width:160px;">
+            <div class="small-note">Total</div>
+            <div id="cartTotal" style="font-size:1.4rem;font-weight:700">Q0.00</div>
+          </div>
+        </div>
+
+        <div id="cashBox" class="cash-box" style="display:none;">
+          <div class="cash-grid">
+            <div>
+              <label>Billete / efectivo recibido (Q)</label>
+              <input id="cashReceived" type="number" min="0" step="0.01" placeholder="Ej: 100"/>
+              <div class="small-note">Ingresa lo que el cliente entrega. Calcula el cambio automáticamente.</div>
+            </div>
+            <div>
+              <label>Cambio a entregar</label>
+              <div id="cashChange" class="cash-value">Q0.00</div>
+              <div id="cashWarn" class="small-note" style="color:#ff8a8a; display:none; margin-top:6px;">
+                El efectivo recibido es menor al total.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+          <button id="payBtn">Cobrar</button>
+          <button id="clearCartBtn" class="ghost">Limpiar</button>
+        </div>
+
+        <div class="small-note">Ticket tamaño Carta imprimible / Guardar como PDF.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================== VIEW: INVENTARIO ===================== -->
+  <section id="view-inventario" class="view">
+    <div class="card">
+      <h2>Agregar producto</h2>
+
+      <label>Código de barras / Código</label>
+      <input id="p_code" type="text" placeholder="Ej: 7501234567890" autocomplete="off"/>
+
+      <label>Descripción / Nombre</label>
+      <input id="p_name" type="text" placeholder="Ej: Polo blanco"/>
+
+      <div class="grid2">
+        <div>
+          <label>Precio de costo (Q)</label>
+          <input id="p_cost" type="number" min="0" step="0.01"/>
+        </div>
+        <div>
+          <label>Precio de venta (Q)</label>
+          <input id="p_price" type="number" min="0" step="0.01"/>
+        </div>
+      </div>
+
+      <label>Stock</label>
+      <input id="p_stock" type="number" min="0" step="1"/>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+        <button id="addProductBtn" class="big-button">Agregar producto</button>
+        <button id="cancelEditBtn" class="ghost" style="display:none;">Cancelar edición</button>
+        <button id="clearProductsBtn" class="danger">Borrar todo</button>
+        <button id="exportProductsBtn" class="ghost">Imprimir / Guardar inventario (Carta)</button>
+      </div>
+
+      <div id="editHint" class="small-note" style="margin-top:8px;display:none;">
+        Editando producto: <strong id="editNameLabel"></strong> (se guardará con código 3336)
+      </div>
+
+      <hr/>
+      <h3>Productos disponibles</h3>
+      <ul id="productsList" class="list"></ul>
+    </div>
+  </section>
+
+  <!-- ===================== VIEW: REGISTRO + CIERRE ===================== -->
+  <section id="view-registro" class="view">
+    <div class="card">
+
+      <div class="sub-card">
+        <div class="grid2" style="align-items:end;">
+          <div>
+            <h2>Registro diario</h2>
+            <label>Fecha</label>
+            <input id="salesDate" type="date"/>
+            <div class="small-note">Visualiza ventas por día.</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+            <button id="exportDailyBtn" class="ghost">Imprimir / Guardar ventas del día (Carta)</button>
+            <button id="deleteSales" class="danger">Borrar ventas</button>
+          </div>
+        </div>
+
+        <hr/>
+
+        <h3>Ventas del día</h3>
+        <ul id="salesList" class="list"></ul>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+          <div><div class="small-note">Ventas</div><div id="salesCount">0</div></div>
+          <div class="right"><div class="small-note">Total</div><div id="salesTotal">Q0.00</div></div>
+        </div>
+
+        <div class="sub-card" style="margin-top:14px;">
+          <h3>Reimprimir ticket</h3>
+          <div class="flex-row">
+            <input id="reprintTicketNo" type="number" min="1" placeholder="Número de ticket (Ej: 15)"/>
+            <button id="reprintBtn" class="ghost">Reimprimir</button>
+          </div>
+          <div class="small-note">También puedes reimprimir desde la lista (botón Reimprimir).</div>
+        </div>
+      </div>
+
+      <div class="sub-card">
+        <h2>Cierre de caja</h2>
+        <div class="small-note">Ingresa lo contado por forma de pago para cuadre vs ventas del día.</div>
+
+        <div class="grid2">
+          <div>
+            <label>Efectivo contado (Q)</label>
+            <input id="closeCash" type="number" min="0" step="0.01" value="0"/>
+          </div>
+          <div>
+            <label>Tarjeta contado (Q)</label>
+            <input id="closeCard" type="number" min="0" step="0.01" value="0"/>
+          </div>
+        </div>
+        <div class="grid2">
+          <div>
+            <label>Transferencia contado (Q)</label>
+            <input id="closeTransfer" type="number" min="0" step="0.01" value="0"/>
+          </div>
+          <div>
+            <label>Observación (opcional)</label>
+            <input id="closeNote" type="text" placeholder="Ej: Faltante por cambio, propina, etc."/>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button id="calcCloseBtn" class="ghost">Calcular cuadre</button>
+          <button id="printCloseBtn">Imprimir cierre / Guardar PDF (Carta)</button>
+        </div>
+
+        <div id="closeResult" style="margin-top:10px;" class="small-note"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="footer">MarckBusiness © 2026 — Todos los derechos reservados</div>
+</div>
+
+<script>
+/* ==========================
+   HELPERS
+========================== */
+function escapeHtml(s){
+  return String(s ?? '').replace(/[&<>"']/g, m => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+  }[m]));
+}
+function formatQ(v){ return 'Q'+Number(v).toFixed(2); }
+function safeNumber(x){ const n = Number(x); return isFinite(n) ? n : 0; }
+function pad2(n){ return String(n).padStart(2,'0'); }
+function dateKeyFromDate(d){
+  const dt = new Date(d);
+  return dt.getFullYear() + '-' + pad2(dt.getMonth()+1) + '-' + pad2(dt.getDate());
+}
+function todayKey(){ return dateKeyFromDate(new Date()); }
+
+/* ==========================
+   BLOQUEADOR UI (reutilizable)
+========================== */
+function showBlocker({title, msgHTML, buttons, onReady}){
+  let el = document.getElementById('cg_blocker');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'cg_blocker';
+    el.className = 'blocker';
+    document.body.appendChild(el);
+  }
+  el.innerHTML = `
+    <div class="blocker-card">
+      <h2>${escapeHtml(title)}</h2>
+      <div>${msgHTML}</div>
+      <div class="blocker-actions">
+        ${buttons.map((b,i)=>`<button id="blkbtn_${i}" class="${b.className||''}">${escapeHtml(b.text)}</button>`).join('')}
+      </div>
+      <div style="margin-top:10px;color:#aaa;font-size:.85rem;">
+        Nota: el estado se guarda en este navegador. Si borras datos del navegador, se perderá.
+      </div>
+    </div>
+  `;
+  buttons.forEach((b,i)=>{ document.getElementById(`blkbtn_${i}`).onclick = b.onClick; });
+  if(typeof onReady === 'function') onReady();
+}
+
+/* ==========================
+   ACTIVACION SOLO 1 VEZ (22782522)
+========================== */
+const KEY_ACTIVATED = 'cg_activated_v1';
+const ACTIVATION_CODE = '22782522';
+
+/* ==========================
+   ✅ CADUCIDAD (3 DÍAS)
+   - desde primera apertura (trial)
+   - o desde activación
+========================== */
+const KEY_TRIAL_START = 'cg_trial_start_v1';
+const KEY_ACTIVATED_AT = 'cg_activated_at_v1';
+const KEY_EXPIRES_AT = 'cg_expires_at_v1';
+const EXP_DAYS = 3;
+
+function msDays(d){ return d * 24 * 60 * 60 * 1000; }
+function setIfMissing(key, value){
+  if(localStorage.getItem(key) === null){
+    localStorage.setItem(key, String(value));
+  }
+}
+function computeExpiresAt(){
+  // inicio trial al primer uso
+  setIfMissing(KEY_TRIAL_START, Date.now());
+
+  const activated = localStorage.getItem(KEY_ACTIVATED) === '1';
+  const trialStart = parseInt(localStorage.getItem(KEY_TRIAL_START) || '0', 10) || Date.now();
+  const activatedAt = parseInt(localStorage.getItem(KEY_ACTIVATED_AT) || '0', 10);
+
+  const base = (activated && activatedAt) ? activatedAt : trialStart;
+  const expiresAt = base + msDays(EXP_DAYS);
+
+  localStorage.setItem(KEY_EXPIRES_AT, String(expiresAt));
+  return expiresAt;
+}
+function fmtRemaining(ms){
+  if(ms <= 0) return "0h";
+  const totalMin = Math.floor(ms/60000);
+  const days = Math.floor(totalMin / (60*24));
+  const hours = Math.floor((totalMin - days*60*24) / 60);
+  const mins = totalMin % 60;
+  if(days > 0) return `${days} día(s) ${hours}h`;
+  if(hours > 0) return `${hours}h ${mins}m`;
+  return `${mins}m`;
+}
+function enforceExpiry(){
+  const expiresAt = computeExpiresAt();
+  const now = Date.now();
+  const remaining = expiresAt - now;
+
+  if(remaining <= 0){
+    const expDate = new Date(expiresAt).toLocaleString();
+    showBlocker({
+      title: 'Sistema caducado',
+      msgHTML: `
+        <p>Este sistema ha caducado.</p>
+        <p><b>Caducó el:</b> ${escapeHtml(expDate)}</p>
+        <p>Comunícate con soporte para renovar la autorización.</p>
+      `,
+      buttons: [
+        { text:'Cerrar', className:'ghost', onClick: ()=>{} }
+      ]
+    });
+    throw new Error("Caducado");
+  }
+
+  // (opcional) guarda un texto útil si quisieras mostrarlo en UI
+  localStorage.setItem('cg_remaining_human_v1', fmtRemaining(remaining));
+}
+
+function enforceActivationOnce(){
+  const ok = localStorage.getItem(KEY_ACTIVATED) === '1';
+  if(ok) return true;
+
+  showBlocker({
+    title: 'Activación requerida',
+    msgHTML: `
+      <p>Este sistema requiere activación la primera vez.</p>
+      <p><b>Ingresa el código para continuar:</b></p>
+      <div style="margin-top:12px;">
+        <label style="display:block;margin-bottom:6px;color:#aaa;">Código</label>
+        <input id="actCodeInput" type="password"
+          placeholder="••••••••"
+          style="width:100%;padding:12px;border-radius:12px;border:1px solid #333;background:#0f0f0f;color:#fff;font-size:18px;letter-spacing:2px;"
+          autocomplete="off"
+        />
+        <div id="actMsg" style="margin-top:10px;color:#ff8a8a;font-size:.95rem;display:none;"></div>
+      </div>
+    `,
+    buttons: [
+      {
+        text:'Activar',
+        onClick: ()=>{
+          const input = document.getElementById('actCodeInput');
+          const msg = document.getElementById('actMsg');
+          const code = (input?.value || '').trim();
+
+          if(code !== ACTIVATION_CODE){
+            msg.style.display = 'block';
+            msg.textContent = 'Código incorrecto. Intenta nuevamente.';
+            input.focus();
+            input.select();
+            return;
+          }
+
+          // ✅ marcar activado + fecha activación (reinicia conteo de 3 días desde aquí)
+          localStorage.setItem(KEY_ACTIVATED, '1');
+          localStorage.setItem(KEY_ACTIVATED_AT, String(Date.now()));
+          // recalcular y guardar expiración desde activación
+          computeExpiresAt();
+
+          const blk = document.getElementById('cg_blocker');
+          if(blk) blk.remove();
+
+          location.reload();
+        }
+      },
+      { text:'Cerrar', className:'ghost', onClick: ()=>{} }
+    ],
+    onReady: ()=>{
+      const input = document.getElementById('actCodeInput');
+      const msg = document.getElementById('actMsg');
+
+      input.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter'){
+          e.preventDefault();
+          document.getElementById('blkbtn_0').click();
+        }
+      });
+      input.addEventListener('input', ()=>{ msg.style.display = 'none'; });
+      setTimeout(()=>input.focus(), 50);
+    }
+  });
+
+  throw new Error("No activado");
+}
+
+/* ==========================
+   UNA SOLA PESTAÑA ACTIVA
+========================== */
+const KEY_ACTIVE_TAB = 'cg_active_tab_v1';
+const KEY_ACTIVE_PING = 'cg_active_ping_v1';
+const TAB_ID = 'TAB-' + Math.random().toString(16).slice(2) + '-' + Date.now();
+
+function nowMs(){ return Date.now(); }
+function isAnotherTabActive(){
+  const active = localStorage.getItem(KEY_ACTIVE_TAB);
+  const ping = parseInt(localStorage.getItem(KEY_ACTIVE_PING) || '0', 10);
+  const alive = (nowMs() - ping) < 3500;
+  return active && active !== TAB_ID && alive;
+}
+function takeControl(){
+  localStorage.setItem(KEY_ACTIVE_TAB, TAB_ID);
+  localStorage.setItem(KEY_ACTIVE_PING, String(nowMs()));
+}
+function enforceSingleTab(){
+  if(!localStorage.getItem(KEY_ACTIVE_TAB)) takeControl();
+
+  if(isAnotherTabActive()){
+    showBlocker({
+      title: 'Ya hay un sistema abierto',
+      msgHTML: `
+        <p>Para evitar confusión con productos/ventas, solo una pestaña queda activa.</p>
+        <p>Si deseas usar <b>esta</b> pestaña, presiona <b>Tomar control</b>.</p>
+      `,
+      buttons: [
+        { text:'Tomar control', onClick: ()=>{ takeControl(); location.reload(); } },
+        { text:'Dejar esta pestaña', className:'ghost', onClick: ()=>{} }
+      ]
+    });
+    throw new Error("Tab duplicada");
+  }
+
+  setInterval(()=>{
+    const active = localStorage.getItem(KEY_ACTIVE_TAB);
+    if(active === TAB_ID){
+      localStorage.setItem(KEY_ACTIVE_PING, String(nowMs()));
+    }
+  }, 1000);
+
+  window.addEventListener('storage', (e)=>{
+    if(e.key === KEY_ACTIVE_TAB){
+      if(isAnotherTabActive()){
+        showBlocker({
+          title: 'Otra pestaña tomó control',
+          msgHTML: `
+            <p>Este sistema quedó activo en otra pestaña.</p>
+            <p>Si deseas usar esta pestaña, presiona <b>Tomar control</b>.</p>
+          `,
+          buttons: [
+            { text:'Tomar control', onClick: ()=>{ takeControl(); location.reload(); } },
+            { text:'OK', className:'ghost', onClick: ()=>{} }
+          ]
+        });
+      }
+    }
+  });
+
+  window.addEventListener('beforeunload', ()=>{
+    const active = localStorage.getItem(KEY_ACTIVE_TAB);
+    if(active === TAB_ID){
+      localStorage.removeItem(KEY_ACTIVE_TAB);
+      localStorage.removeItem(KEY_ACTIVE_PING);
+    }
+  });
+}
+
+/* ==========================
+   IMPRESION MISMA PESTAÑA - CARTA
+========================== */
+function printHTMLSameTab({ title, bodyHTML, pageCSS, waitForLogo=true }){
+  const originalBody = document.body.innerHTML;
+  const originalTitle = document.title;
+
+  const style = document.createElement('style');
+  style.id = 'printStyle';
+  style.textContent = `
+    @page { size: letter; margin: 12mm; }
+    html,body{ background:#fff !important; color:#111 !important; }
+    body{ font-family: Arial, sans-serif !important; }
+    .printWrap{ padding:0; }
+
+    .p-title{ font-size:26px; font-weight:800; text-align:center; margin:6px 0 2px; }
+    .p-sub{ font-size:18px; font-weight:700; text-align:center; margin:0 0 10px; }
+    .p-meta{ font-size:16px; margin:6px 0; }
+    .p-meta b{ font-weight:800; }
+    .p-hr{ border-top:2px solid #111; margin:12px 0; }
+    .p-logo{ display:block; margin:0 auto 10px; max-width:320px; height:auto; }
+    table{ width:100%; border-collapse:collapse; }
+    th{ font-size:16px; text-align:left; border-bottom:2px solid #111; padding:10px 6px; }
+    td{ font-size:16px; border-bottom:1px solid #bbb; padding:10px 6px; vertical-align:top; }
+    .right{ text-align:right; }
+    .center{ text-align:center; }
+    .wrap{ word-wrap:break-word; white-space:normal; }
+    .totalRow{ font-size:22px; font-weight:900; display:flex; justify-content:space-between; margin-top:12px; }
+
+    @media print{ .no-print{ display:none !important; } }
+
+    ${pageCSS || ''}
+  `;
+  document.head.appendChild(style);
+
+  document.title = title || originalTitle;
+  document.body.innerHTML = `<div class="printWrap">${bodyHTML}</div>`;
+
+  const doPrint = () => {
+    window.focus();
+    window.print();
+    setTimeout(() => {
+      document.body.innerHTML = originalBody;
+      document.title = originalTitle;
+      const st = document.getElementById('printStyle');
+      if(st) st.remove();
+      location.reload();
+    }, 250);
+  };
+
+  if(!waitForLogo){
+    setTimeout(doPrint, 250);
+    return;
+  }
+
+  const imgs = document.images;
+  if(!imgs || imgs.length === 0){
+    setTimeout(doPrint, 250);
+    return;
+  }
+
+  let pending = imgs.length;
+  const safety = setTimeout(doPrint, 1500);
+
+  Array.from(imgs).forEach(img=>{
+    if(img.complete){
+      pending--;
+      if(pending<=0){
+        clearTimeout(safety);
+        setTimeout(doPrint, 200);
+      }
+    }else{
+      img.onload = img.onerror = ()=>{
+        pending--;
+        if(pending<=0){
+          clearTimeout(safety);
+          setTimeout(doPrint, 200);
+        }
+      };
+    }
+  });
+}
+
+/* ==========================
+   MENU HAMBURGUESA
+========================== */
+const btnOpenMenu = document.getElementById('btnOpenMenu');
+const btnCloseMenu = document.getElementById('btnCloseMenu');
+const drawer = document.getElementById('drawer');
+const backdrop = document.getElementById('drawerBackdrop');
+const navBtns = Array.from(document.querySelectorAll('.navbtn'));
+const viewTitle = document.getElementById('viewTitle');
+
+const views = {
+  venta: document.getElementById('view-venta'),
+  inventario: document.getElementById('view-inventario'),
+  registro: document.getElementById('view-registro'),
+};
+const titleMap = { venta:'VENTA / CARRITO', inventario:'INVENTARIO', registro:'REGISTRO + CIERRE' };
+
+function openMenu(){
+  drawer.classList.add('open');
+  backdrop.classList.add('open');
+  drawer.setAttribute('aria-hidden','false');
+}
+function closeMenu(){
+  drawer.classList.remove('open');
+  backdrop.classList.remove('open');
+  drawer.setAttribute('aria-hidden','true');
+}
+btnOpenMenu.onclick = openMenu;
+btnCloseMenu.onclick = closeMenu;
+backdrop.onclick = closeMenu;
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeMenu(); });
+
+function switchView(key){
+  Object.keys(views).forEach(k=>views[k].classList.remove('active'));
+  views[key].classList.add('active');
+  navBtns.forEach(b=>b.classList.toggle('active', b.dataset.view===key));
+  viewTitle.textContent = titleMap[key] || 'MÓDULO';
+
+  try{ renderProducts(); }catch(e){}
+  try{ renderCart(); }catch(e){}
+  try{ renderSales(); }catch(e){}
+  try{ renderCloseResult(); }catch(e){}
+}
+navBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    switchView(btn.dataset.view);
+    closeMenu();
+  });
+});
+
+/* ==========================
+   APP DATA
+========================== */
+const KEY_PRODUCTS = 'mb_products_pdf';
+const KEY_SALES = 'mb_sales_pdf';
+const KEY_TICKET = 'mb_ticket_counter_pdf';
+
+let products = JSON.parse(localStorage.getItem(KEY_PRODUCTS)||'[]');
+let sales = JSON.parse(localStorage.getItem(KEY_SALES)||'[]');
+let ticketCounter = parseInt(localStorage.getItem(KEY_TICKET)||'1',10);
+let cart = [];
+
+/* MIGRACIÓN (incluye code) */
+products = (products || []).map(p => ({
+  code: (p && (p.code !== undefined)) ? String(p.code ?? '').trim() : '',
+  name: (p && p.name) ? p.name : '',
+  cost: isFinite(Number(p && p.cost)) ? Number(p.cost) : 0,
+  price: isFinite(Number(p && p.price)) ? Number(p.price) : 0,
+  stock: Number.isFinite(parseInt(p && p.stock,10)) ? parseInt(p.stock,10) : 0
+}));
+localStorage.setItem(KEY_PRODUCTS, JSON.stringify(products));
+
+/* ELEMENTS */
+const productsList = document.getElementById('productsList');
+const addProductBtn = document.getElementById('addProductBtn');
+const cancelEditBtn = document.getElementById('cancelEditBtn');
+const clearProductsBtn = document.getElementById('clearProductsBtn');
+const exportProductsBtn = document.getElementById('exportProductsBtn');
+
+const p_code = document.getElementById('p_code');
+const p_name = document.getElementById('p_name');
+const p_cost = document.getElementById('p_cost');
+const p_price = document.getElementById('p_price');
+const p_stock = document.getElementById('p_stock');
+
+const editHint = document.getElementById('editHint');
+const editNameLabel = document.getElementById('editNameLabel');
+
+const scanInput = document.getElementById('scanInput');
+const scanAddBtn = document.getElementById('scanAddBtn');
+
+const filterInput = document.getElementById('filterInput');
+const filterQty = document.getElementById('filterQty');
+const productsDatalist = document.getElementById('productsDatalist');
+const addFilterBtn = document.getElementById('addFilterBtn');
+const productSelect = document.getElementById('productSelect');
+
+const cartTableBody = document.querySelector('#cartTable tbody');
+const cartTotalEl = document.getElementById('cartTotal');
+const payBtn = document.getElementById('payBtn');
+const clearCartBtn = document.getElementById('clearCartBtn');
+const clientNameEl = document.getElementById('clientName');
+const payMethodEl = document.getElementById('payMethod');
+
+const cashBox = document.getElementById('cashBox');
+const cashReceivedEl = document.getElementById('cashReceived');
+const cashChangeEl = document.getElementById('cashChange');
+const cashWarnEl = document.getElementById('cashWarn');
+
+const salesList = document.getElementById('salesList');
+const salesCount = document.getElementById('salesCount');
+const salesTotal = document.getElementById('salesTotal');
+const deleteSalesBtn = document.getElementById('deleteSales');
+const exportDailyBtn = document.getElementById('exportDailyBtn');
+const salesDateEl = document.getElementById('salesDate');
+
+const reprintTicketNoEl = document.getElementById('reprintTicketNo');
+const reprintBtn = document.getElementById('reprintBtn');
+
+const closeCashEl = document.getElementById('closeCash');
+const closeCardEl = document.getElementById('closeCard');
+const closeTransferEl = document.getElementById('closeTransfer');
+const closeNoteEl = document.getElementById('closeNote');
+const calcCloseBtn = document.getElementById('calcCloseBtn');
+const printCloseBtn = document.getElementById('printCloseBtn');
+const closeResultEl = document.getElementById('closeResult');
+
+function saveProducts(){ localStorage.setItem(KEY_PRODUCTS, JSON.stringify(products)); }
+function saveSales(){ localStorage.setItem(KEY_SALES, JSON.stringify(sales)); }
+function saveTicketCounter(){ localStorage.setItem(KEY_TICKET, ticketCounter.toString()); }
+
+/* EDICIÓN */
+let editingIndex = null;
+function resetProductForm(){
+  p_code.value = '';
+  p_name.value = '';
+  p_cost.value = '';
+  p_price.value = '';
+  p_stock.value = '';
+  editingIndex = null;
+
+  addProductBtn.textContent = 'Agregar producto';
+  cancelEditBtn.style.display = 'none';
+  editHint.style.display = 'none';
+  editNameLabel.textContent = '';
+}
+cancelEditBtn.onclick = () => resetProductForm();
+
+/* CÓDIGOS */
+function normalizeCode(s){ return String(s ?? '').trim(); }
+function findProductIndexByCode(code){
+  const c = normalizeCode(code);
+  if(!c) return -1;
+  return products.findIndex(p => normalizeCode(p.code) === c);
+}
+
+/* PRODUCTOS */
+function renderProducts(){
+  productsList.innerHTML='';
+  if(products.length===0){
+    productsList.innerHTML='<li class="center small-note">No hay productos</li>';
+  } else {
+    products.forEach((p,idx)=>{
+      const li = document.createElement('li');
+      const stockClass = (p.stock===0?'small-note':'');
+      const codeLine = p.code ? `<span class="pill">COD: ${escapeHtml(p.code)}</span>` : `<span class="pill">SIN CÓDIGO</span>`;
+      li.innerHTML=`
+        <div>
+          <strong>${escapeHtml(p.name)}</strong> <span class="${stockClass}">(${p.stock})</span><br>
+          <span class="small-note">Venta: ${formatQ(p.price)} | Costo: ${formatQ(p.cost)}</span><br>
+          <span class="small-note">${codeLine}</span>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
+          <button onclick="addToCart(${idx},1)" ${p.stock===0?'disabled':''}>Agregar</button>
+          <button onclick="editProduct(${idx})" class="ghost">Editar</button>
+          <button onclick="restockProduct(${idx})" class="ghost">Stock +</button>
+          <button onclick="deleteProduct(${idx})" class="danger">Eliminar</button>
+        </div>
+      `;
+      productsList.appendChild(li);
+    });
+  }
+
+  productsDatalist.innerHTML='';
+  products.forEach(p=>{
+    const op=document.createElement('option');
+    op.value = p.name;
+    productsDatalist.appendChild(op);
+
+    if(p.code){
+      const op2=document.createElement('option');
+      op2.value = p.code;
+      productsDatalist.appendChild(op2);
+    }
+  });
+
+  productSelect.innerHTML = '<option value="">-- Seleccionar producto --</option>';
+  products.forEach((p, idx) => {
+    const o = document.createElement('option');
+    o.value = idx;
+    o.textContent = p.name + (p.stock !== undefined ? ` (${p.stock})` : '') + (p.code ? ` — ${p.code}` : '');
+    productSelect.appendChild(o);
+  });
+}
+
+addProductBtn.onclick = ()=>{
+  const code = normalizeCode(p_code.value);
+  const name = p_name.value.trim();
+  const cost = parseFloat(p_cost.value)||0;
+  const price = parseFloat(p_price.value)||0;
+  const stock = parseInt(p_stock.value)||0;
+
+  if(!name){ alert('Nombre requerido'); return; }
+  if(cost < 0 || price < 0 || stock < 0){ alert('Datos inválidos'); return; }
+
+  if(code){
+    const dupIdx = products.findIndex((p, i)=> normalizeCode(p.code) === code && i !== editingIndex);
+    if(dupIdx !== -1){
+      alert('Ese código ya está asignado a otro producto.');
+      return;
+    }
+  }
+
+  if(editingIndex !== null){
+    const sec = prompt("Ingrese código para guardar cambios:");
+    if(sec !== '3336'){ alert("Código incorrecto"); return; }
+
+    products[editingIndex] = { ...products[editingIndex], code, name, cost, price, stock };
+    saveProducts(); renderProducts(); resetProductForm();
+    alert("Producto actualizado.");
+    return;
+  }
+
+  products.push({ code, name, cost, price, stock });
+  saveProducts(); renderProducts();
+  p_code.value=''; p_name.value=''; p_cost.value=''; p_price.value=''; p_stock.value='';
+};
+
+clearProductsBtn.onclick = ()=>{
+  const code = prompt("Ingrese código para borrar productos:");
+  if(code==='3336'){
+    if(confirm('Borrar todos los productos?')){
+      products=[]; saveProducts(); renderProducts();
+      resetProductForm();
+    }
+  } else { alert("Código incorrecto"); }
+};
+
+function deleteProduct(idx){
+  const code = prompt("Ingrese código para borrar producto:");
+  if(code==='3336'){
+    products.splice(idx,1);
+    saveProducts(); renderProducts();
+    if(editingIndex === idx){ resetProductForm(); }
+    else if(editingIndex !== null && idx < editingIndex){ editingIndex -= 1; }
+  } else { alert("Código incorrecto"); }
+}
+window.deleteProduct = deleteProduct;
+
+function editProduct(idx){
+  const code = prompt("Ingrese código para editar producto:");
+  if(code !== '3336'){ alert("Código incorrecto"); return; }
+
+  const p = products[idx];
+  switchView('inventario');
+
+  editingIndex = idx;
+  p_code.value = p.code || '';
+  p_name.value = p.name || '';
+  p_cost.value = (p.cost ?? 0);
+  p_price.value = (p.price ?? 0);
+  p_stock.value = (p.stock ?? 0);
+
+  addProductBtn.textContent = 'Guardar cambios';
+  cancelEditBtn.style.display = 'inline-block';
+  editHint.style.display = 'block';
+  editNameLabel.textContent = p.name || '';
+}
+window.editProduct = editProduct;
+
+function restockProduct(idx){
+  const code = prompt("Ingrese código para agregar stock:");
+  if(code !== '3336'){ alert("Código incorrecto"); return; }
+  const qty = parseInt(prompt("¿Cuánto stock desea agregar? (Ej: 10)"), 10);
+  if(!Number.isFinite(qty) || qty <= 0){ alert("Cantidad inválida"); return; }
+
+  products[idx].stock = (parseInt(products[idx].stock,10) || 0) + qty;
+  saveProducts(); renderProducts();
+  alert(`Stock actualizado: ${products[idx].name} = ${products[idx].stock}`);
+}
+window.restockProduct = restockProduct;
+
+/* CARRITO */
+function cartTotalNumber(){
+  return cart.reduce((acc,it)=> acc + (safeNumber(it.price) * safeNumber(it.qty)), 0);
+}
+function renderCart(){
+  cartTableBody.innerHTML='';
+  if(cart.length===0){
+    cartTableBody.innerHTML='<tr><td colspan="5" class="center small-note">Carrito vacío</td></tr>';
+    cartTotalEl.textContent='Q0.00';
+    renderCashUI();
+    return;
+  }
+  let total=0;
+  cart.forEach((item,i)=>{
+    const line = item.price*item.qty;
+    total+=line;
+    const tr = document.createElement('tr');
+    tr.innerHTML=`
+      <td>${item.qty}</td>
+      <td>${escapeHtml(item.name)}</td>
+      <td class="right">${formatQ(item.price)}</td>
+      <td class="right">${formatQ(line)}</td>
+      <td><button onclick="removeFromCart(${i})" class="danger">X</button></td>
+    `;
+    cartTableBody.appendChild(tr);
+  });
+  cartTotalEl.textContent = formatQ(total);
+  renderCashUI();
+}
+
+function addToCart(idx, qty){
+  const prod = products[idx];
+  if(prod.stock===0){ alert('Sin stock'); return; }
+
+  const exist = cart.find(c=>c.idx===idx);
+  if(exist){
+    if(exist.qty+qty>prod.stock){ alert('No hay suficiente stock'); return; }
+    exist.qty += qty;
+  }else{
+    cart.push({ idx, name: prod.name, price: prod.price, cost: prod.cost, qty });
+  }
+  renderCart();
+}
+window.addToCart = addToCart;
+
+function addToCartByCode(code, qty){
+  const idx = findProductIndexByCode(code);
+  if(idx === -1){ alert('Código no encontrado'); return; }
+  addToCart(idx, qty);
+}
+window.addToCartByCode = addToCartByCode;
+
+scanAddBtn.onclick = ()=>{
+  const code = normalizeCode(scanInput.value);
+  const qty = 1;
+  if(!code){ return; }
+  addToCartByCode(code, qty);
+  scanInput.value = '';
+  scanInput.focus();
+};
+scanInput.addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    scanAddBtn.click();
+  }
+});
+
+addFilterBtn.onclick = ()=>{
+  const raw = filterInput.value.trim();
+  const qty = parseInt(filterQty.value)||1;
+
+  let idx = products.findIndex(p=>p.name.toLowerCase()===raw.toLowerCase());
+  if(idx===-1){ idx = findProductIndexByCode(raw); }
+  if(idx===-1){ alert('Producto no encontrado'); return; }
+
+  addToCart(idx, qty);
+  filterInput.value=''; filterQty.value='1';
+};
+
+productSelect.addEventListener('change', ()=>{
+  const idx = parseInt(productSelect.value);
+  if(!isNaN(idx)){
+    filterInput.value = products[idx].name;
+    filterQty.value = 1;
+  }
+});
+
+function removeFromCart(i){ cart.splice(i,1); renderCart(); }
+window.removeFromCart = removeFromCart;
+
+clearCartBtn.onclick = ()=>{
+  if(confirm('Limpiar carrito?')){
+    cart=[];
+    renderCart();
+  }
+};
+
+/* EFECTIVO RECIBIDO + CAMBIO */
+function renderCashUI(){
+  const method = (payMethodEl.value || 'EFECTIVO').toUpperCase();
+  const total = cartTotalNumber();
+
+  if(method === 'EFECTIVO'){
+    cashBox.style.display = 'block';
+    const received = safeNumber(cashReceivedEl.value);
+    const change = received - total;
+
+    cashChangeEl.textContent = formatQ(Math.max(0, change));
+    if(total > 0 && received > 0 && received < total){
+      cashWarnEl.style.display = 'block';
+    }else{
+      cashWarnEl.style.display = 'none';
+    }
+  }else{
+    cashBox.style.display = 'none';
+    cashReceivedEl.value = '';
+    cashChangeEl.textContent = 'Q0.00';
+    cashWarnEl.style.display = 'none';
+  }
+}
+payMethodEl.addEventListener('change', ()=> renderCashUI());
+cashReceivedEl.addEventListener('input', ()=> renderCashUI());
+
+/* REGISTRO DIARIO */
+function salesOfDay(dayKey){
+  return sales.filter(s => (s.dayKey || dateKeyFromDate(s.date)) === dayKey);
+}
+function computeDayTotals(dayKey){
+  const daySales = salesOfDay(dayKey);
+  let total=0;
+  let totalCost=0;
+  const byMethod = { EFECTIVO:0, TARJETA:0, TRANSFERENCIA:0 };
+
+  daySales.forEach(s=>{
+    total += safeNumber(s.total);
+    totalCost += safeNumber(s.totalCost);
+    const m = (s.method || 'EFECTIVO').toUpperCase();
+    if(byMethod[m] === undefined) byMethod[m] = 0;
+    byMethod[m] += safeNumber(s.total);
+  });
+
+  const profit = total - totalCost;
+  return { count: daySales.length, total, totalCost, profit, byMethod, daySales };
+}
+function renderSales(){
+  const dayKey = salesDateEl.value || todayKey();
+  const { count, total, daySales } = computeDayTotals(dayKey);
+
+  salesList.innerHTML='';
+  if(daySales.length===0){
+    salesList.innerHTML='<li class="center small-note">No hay ventas en esta fecha</li>';
+  } else {
+    daySales.forEach(s=>{
+      const li = document.createElement('li');
+      const method = (s.method || 'EFECTIVO').toUpperCase();
+      const clientTxt = s.client ? s.client : 'Cliente';
+
+      const cashLine = (method === 'EFECTIVO' && (s.cashReceived !== undefined && s.cashReceived !== null))
+        ? `<div class="small-note">Recibido: ${formatQ(s.cashReceived)} | Cambio: ${formatQ(s.changeDue || 0)}</div>`
+        : ``;
+
+      li.innerHTML = `
+        <div>
+          Ticket ${escapeHtml(s.ticket)} - ${escapeHtml(clientTxt)} - ${formatQ(s.total)}
+          <div class="small-note">
+            <span class="pill">${escapeHtml(method)}</span>
+            <span class="small-note">${new Date(s.date).toLocaleString()}</span>
+          </div>
+          ${cashLine}
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
+          <button class="ghost" onclick="reprintTicket(${escapeHtml(s.ticket)})">Reimprimir</button>
+        </div>
+      `;
+      salesList.appendChild(li);
+    });
+  }
+
+  salesCount.textContent = count;
+  salesTotal.textContent = formatQ(total);
+}
+(function initDate(){ salesDateEl.value = todayKey(); })();
+salesDateEl.addEventListener('change', ()=>{ renderSales(); renderCloseResult(); });
+
+deleteSalesBtn.onclick = ()=>{
+  const code = prompt("Ingrese código para borrar ventas:");
+  if(code==='3336'){
+    if(confirm('Borrar todas las ventas?')){
+      sales=[]; saveSales(); renderSales(); renderCloseResult();
+    }
+  } else { alert("Código incorrecto"); }
+};
+
+/* EXPORT INVENTARIO */
+exportProductsBtn.onclick = ()=>{
+  const rows = products.map(p => `
+    <tr>
+      <td class="wrap">${escapeHtml(p.code || '')}</td>
+      <td class="wrap">${escapeHtml(p.name)}</td>
+      <td class="right">${formatQ(p.cost)}</td>
+      <td class="right">${formatQ(p.price)}</td>
+      <td class="right">${escapeHtml(p.stock)}</td>
+    </tr>
+  `).join('');
+
+  const bodyHTML = `
+    <img class="p-logo" src="LOGO1.png" onerror="this.style.display='none'">
+    <div class="p-title">Inventario de productos</div>
+    <div class="p-sub">${escapeHtml(new Date().toLocaleString())}</div>
+    <div class="p-hr"></div>
+    <table>
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Producto</th>
+          <th class="right">Costo</th>
+          <th class="right">Venta</th>
+          <th class="right">Stock</th>
+        </tr>
+      </thead>
+      <tbody>${rows || `<tr><td colspan="5" class="center">No hay productos</td></tr>`}</tbody>
+    </table>
+  `;
+  printHTMLSameTab({ title:'Inventario', bodyHTML, pageCSS:'', waitForLogo:true });
+};
+
+/* EXPORT VENTAS DÍA */
+exportDailyBtn.onclick = ()=>{
+  const dayKey = salesDateEl.value || todayKey();
+  const { daySales, total, byMethod, totalCost, profit } = computeDayTotals(dayKey);
+
+  const rows = daySales.map(s=>{
+    const method = (s.method || 'EFECTIVO').toUpperCase();
+    const client = s.client || 'Cliente';
+    const cost = safeNumber(s.totalCost);
+    const prof = safeNumber(s.total) - cost;
+    const hora = new Date(s.date).toLocaleTimeString();
+    return `
+      <tr>
+        <td class="right">${escapeHtml(s.ticket)}</td>
+        <td class="wrap">${escapeHtml(client)}</td>
+        <td>${escapeHtml(method)}</td>
+        <td class="right">${formatQ(s.total)}</td>
+        <td class="right">${formatQ(cost)}</td>
+        <td class="right">${formatQ(prof)}</td>
+        <td class="right">${escapeHtml(hora)}</td>
+      </tr>
+    `;
+  }).join('');
+
+  const bodyHTML = `
+    <img class="p-logo" src="LOGO1.png" onerror="this.style.display='none'">
+    <div class="p-title">Ventas del día</div>
+    <div class="p-sub">${escapeHtml(dayKey)} — ${escapeHtml(new Date().toLocaleString())}</div>
+
+    <div class="p-hr"></div>
+
+    <div class="p-meta"><b>Total ventas:</b> ${formatQ(total)}</div>
+    <div class="p-meta"><b>Costo vendido:</b> ${formatQ(totalCost)} &nbsp; | &nbsp; <b>Ganancia bruta:</b> ${formatQ(profit)}</div>
+    <div class="p-meta"><b>Efectivo:</b> ${formatQ(byMethod.EFECTIVO)} &nbsp; | &nbsp; <b>Tarjeta:</b> ${formatQ(byMethod.TARJETA)} &nbsp; | &nbsp; <b>Transferencia:</b> ${formatQ(byMethod.TRANSFERENCIA)}</div>
+
+    <div class="p-hr"></div>
+
+    <table>
+      <thead>
+        <tr>
+          <th class="right">Ticket</th>
+          <th>Cliente</th>
+          <th>Pago</th>
+          <th class="right">Venta</th>
+          <th class="right">Costo</th>
+          <th class="right">Ganancia</th>
+          <th class="right">Hora</th>
+        </tr>
+      </thead>
+      <tbody>${rows || `<tr><td colspan="7" class="center">No hay ventas</td></tr>`}</tbody>
+    </table>
+  `;
+  printHTMLSameTab({ title:`Ventas_${dayKey}`, bodyHTML, pageCSS:'', waitForLogo:true });
+};
+
+/* COBRO + TICKET */
+payBtn.onclick = ()=>{
+  if(cart.length===0){ alert('Carrito vacío'); return; }
+
+  const client = clientNameEl.value.trim();
+  const method = (payMethodEl.value || 'EFECTIVO').toUpperCase();
+  const currentTicket = ticketCounter;
+  const dayKey = salesDateEl.value || todayKey();
+
+  let totalVenta=0;
+  let totalCost=0;
+
+  const ventaItems = cart.map(item=>{
+    const prod = products[item.idx];
+    if(item.qty>prod.stock){
+      alert(`Stock insuficiente: ${prod.name}`);
+      return null;
+    }
+    prod.stock -= item.qty;
+
+    totalVenta += item.qty * item.price;
+    totalCost += item.qty * safeNumber(item.cost);
+
+    return {...item};
+  }).filter(Boolean);
+
+  let cashReceived = null;
+  let changeDue = null;
+  if(method === 'EFECTIVO'){
+    cashReceived = safeNumber(cashReceivedEl.value);
+    changeDue = cashReceived - totalVenta;
+
+    if(totalVenta > 0 && (!isFinite(cashReceived) || cashReceived <= 0)){
+      alert('Ingresa el efectivo recibido.');
+      return;
+    }
+    if(changeDue < 0){
+      alert('El efectivo recibido es menor al total.');
+      return;
+    }
+  }
+
+  saveProducts(); renderProducts();
+
+  const saleDateISO = new Date().toISOString();
+
+  sales.push({
+    ticket: currentTicket,
+    client,
+    method,
+    items: ventaItems,
+    total: totalVenta,
+    totalCost: totalCost,
+    dayKey,
+    date: saleDateISO,
+    cashReceived: cashReceived,
+    changeDue: changeDue
+  });
+  saveSales();
+
+  ticketCounter++;
+  saveTicketCounter();
+
+  cart=[];
+  renderCart();
+  renderSales();
+  renderCloseResult();
+
+  generateTicketPDF({
+    items: ventaItems,
+    total: totalVenta,
+    client,
+    ticketNo: currentTicket,
+    method,
+    saleDateISO,
+    cashReceived,
+    changeDue
+  });
+};
+
+function generateTicketPDF({items,total,client,ticketNo,method,saleDateISO,cashReceived,changeDue}){
+  const rows = items.map(item=>{
+    const line = item.price * item.qty;
+    return `
+      <tr>
+        <td style="width:70px;">${escapeHtml(item.qty)}</td>
+        <td class="wrap">${escapeHtml(item.name)}</td>
+        <td class="right" style="width:160px;">${escapeHtml(formatQ(item.price))}</td>
+        <td class="right" style="width:160px;">${escapeHtml(formatQ(line))}</td>
+      </tr>
+    `;
+  }).join('');
+
+  const when = saleDateISO ? new Date(saleDateISO) : new Date();
+
+  const cashExtra = (String(method||'').toUpperCase() === 'EFECTIVO' && cashReceived !== null && cashReceived !== undefined)
+    ? `
+      <div class="p-meta"><b>Recibido:</b> ${escapeHtml(formatQ(cashReceived))}</div>
+      <div class="p-meta"><b>Cambio:</b> ${escapeHtml(formatQ(changeDue || 0))}</div>
+    `
+    : ``;
+
+  const bodyHTML = `
+    <img class="p-logo" src="LOGO1.png" onerror="this.style.display='none'">
+    <div class="p-title">MARCK BUSINESS</div>
+    <div class="p-sub">Ticket #${escapeHtml(ticketNo)}</div>
+
+    <div class="p-meta"><b>Forma de pago:</b> ${escapeHtml(method)}</div>
+    ${client ? `<div class="p-meta"><b>Cliente:</b> ${escapeHtml(client)}</div>` : ``}
+    <div class="p-meta"><b>Fecha:</b> ${escapeHtml(when.toLocaleString())}</div>
+    ${cashExtra}
+
+    <div class="p-hr"></div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Cant</th>
+          <th>Producto</th>
+          <th class="right">P.Unit</th>
+          <th class="right">Total</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+
+    <div class="p-hr"></div>
+
+    <div class="totalRow">
+      <div>TOTAL</div>
+      <div>${escapeHtml(formatQ(total))}</div>
+    </div>
+
+    <div class="p-hr"></div>
+    <div class="center" style="font-size:18px;font-weight:700;">¡Gracias por su compra!</div>
+  `;
+
+  printHTMLSameTab({ title:`Ticket_${ticketNo}`, bodyHTML, pageCSS:'', waitForLogo:true });
+}
+
+/* REIMPRESIÓN */
+function findSaleByTicket(ticketNo){
+  const t = parseInt(ticketNo, 10);
+  if(!Number.isFinite(t)) return null;
+  return sales.find(s => parseInt(s.ticket,10) === t) || null;
+}
+function reprintTicket(ticketNo){
+  const s = findSaleByTicket(ticketNo);
+  if(!s){ alert('Ticket no encontrado.'); return; }
+
+  generateTicketPDF({
+    items: s.items || [],
+    total: safeNumber(s.total),
+    client: s.client || '',
+    ticketNo: s.ticket,
+    method: (s.method || 'EFECTIVO').toUpperCase(),
+    saleDateISO: s.date,
+    cashReceived: (s.cashReceived !== undefined ? s.cashReceived : null),
+    changeDue: (s.changeDue !== undefined ? s.changeDue : null)
+  });
+}
+window.reprintTicket = reprintTicket;
+
+reprintBtn.onclick = ()=>{
+  const t = reprintTicketNoEl.value;
+  if(!t){ alert('Ingresa un número de ticket.'); return; }
+  reprintTicket(t);
+};
+reprintTicketNoEl.addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    reprintBtn.click();
+  }
+});
+
+/* CIERRE */
+function calculateClose(){
+  const dayKey = salesDateEl.value || todayKey();
+  const counted = {
+    EFECTIVO: safeNumber(closeCashEl.value),
+    TARJETA: safeNumber(closeCardEl.value),
+    TRANSFERENCIA: safeNumber(closeTransferEl.value)
+  };
+
+  const computed = computeDayTotals(dayKey);
+  const expected = computed.byMethod;
+
+  const diff = {
+    EFECTIVO: counted.EFECTIVO - safeNumber(expected.EFECTIVO),
+    TARJETA: counted.TARJETA - safeNumber(expected.TARJETA),
+    TRANSFERENCIA: counted.TRANSFERENCIA - safeNumber(expected.TRANSFERENCIA)
+  };
+
+  const totalExpected = safeNumber(expected.EFECTIVO)+safeNumber(expected.TARJETA)+safeNumber(expected.TRANSFERENCIA);
+  const totalCounted = counted.EFECTIVO+counted.TARJETA+counted.TRANSFERENCIA;
+  const totalDiff = totalCounted - totalExpected;
+
+  return {
+    dayKey,
+    counted,
+    expected,
+    diff,
+    totalExpected,
+    totalCounted,
+    totalDiff,
+    totalCost: safeNumber(computed.totalCost),
+    profit: safeNumber(computed.profit),
+    note: (closeNoteEl.value||'').trim()
+  };
+}
+function renderCloseResult(){
+  const r = calculateClose();
+  const sign = (n)=> n>0 ? `+${formatQ(n)}` : formatQ(n);
+
+  closeResultEl.innerHTML = `
+    <div><strong>Esperado:</strong> ${formatQ(r.totalExpected)} | <strong>Contado:</strong> ${formatQ(r.totalCounted)} | <strong>Diferencia:</strong> ${sign(r.totalDiff)}</div>
+    <div style="margin-top:6px;">
+      <span class="pill">EFECTIVO ${sign(r.diff.EFECTIVO)}</span>
+      <span class="pill">TARJETA ${sign(r.diff.TARJETA)}</span>
+      <span class="pill">TRANSFERENCIA ${sign(r.diff.TRANSFERENCIA)}</span>
+    </div>
+    <div style="margin-top:10px;">
+      <div><strong>Costo vendido (día):</strong> ${formatQ(r.totalCost)}</div>
+      <div><strong>Ganancia bruta (día):</strong> ${formatQ(r.profit)}</div>
+    </div>
+  `;
+}
+calcCloseBtn.onclick = renderCloseResult;
+
+printCloseBtn.onclick = ()=>{
+  const r = calculateClose();
+  generateCloseTicketPDF(r);
+};
+
+function generateCloseTicketPDF(r){
+  const sign = (n)=> n>0 ? `+${formatQ(n)}` : formatQ(n);
+
+  const bodyHTML = `
+    <img class="p-logo" src="LOGO1.png" onerror="this.style.display='none'">
+    <div class="p-title">CIERRE DE CAJA</div>
+    <div class="p-sub">${escapeHtml(r.dayKey)}</div>
+
+    <div class="p-meta"><b>Generado:</b> ${escapeHtml(new Date().toLocaleString())}</div>
+
+    <div class="p-hr"></div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Forma</th>
+          <th class="right">Esperado</th>
+          <th class="right">Contado</th>
+          <th class="right">Dif</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>EFECTIVO</td>
+          <td class="right">${formatQ(r.expected.EFECTIVO)}</td>
+          <td class="right">${formatQ(r.counted.EFECTIVO)}</td>
+          <td class="right">${escapeHtml(sign(r.diff.EFECTIVO))}</td>
+        </tr>
+        <tr>
+          <td>TARJETA</td>
+          <td class="right">${formatQ(r.expected.TARJETA)}</td>
+          <td class="right">${formatQ(r.counted.TARJETA)}</td>
+          <td class="right">${escapeHtml(sign(r.diff.TARJETA))}</td>
+        </tr>
+        <tr>
+          <td>TRANSFERENCIA</td>
+          <td class="right">${formatQ(r.expected.TRANSFERENCIA)}</td>
+          <td class="right">${formatQ(r.counted.TRANSFERENCIA)}</td>
+          <td class="right">${escapeHtml(sign(r.diff.TRANSFERENCIA))}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="p-hr"></div>
+
+    <div class="p-meta"><b>Total esperado:</b> ${formatQ(r.totalExpected)}</div>
+    <div class="p-meta"><b>Total contado:</b> ${formatQ(r.totalCounted)}</div>
+    <div class="p-meta"><b>Diferencia total:</b> ${escapeHtml(sign(r.totalDiff))}</div>
+
+    <div class="p-hr"></div>
+
+    <div class="p-meta"><b>Costo vendido:</b> ${formatQ(r.totalCost)}</div>
+    <div class="p-meta"><b>Ganancia bruta:</b> ${formatQ(r.profit)}</div>
+
+    ${r.note ? `<div class="p-hr"></div><div class="p-meta wrap"><b>Obs:</b> ${escapeHtml(r.note)}</div>` : ``}
+
+    <div class="p-hr"></div>
+    <div class="center" style="font-size:18px;font-weight:700;">Cierre de caja</div>
+  `;
+  printHTMLSameTab({ title:`Cierre_${r.dayKey}`, bodyHTML, pageCSS:'', waitForLogo:true });
+}
+
+/* ==========================
+   ✅ INIT (orden correcto)
+   1) Caducidad
+   2) Activación
+   3) Una sola pestaña
+   4) Render app
+========================== */
+enforceExpiry();
+enforceActivationOnce();
+enforceSingleTab();
+
+renderProducts();
+renderCart();
+renderSales();
+renderCloseResult();
+resetProductForm();
+
+try{ setTimeout(()=>{ if(scanInput) scanInput.focus(); }, 200); }catch(e){}
+</script>
+
+</body>
+</html>
