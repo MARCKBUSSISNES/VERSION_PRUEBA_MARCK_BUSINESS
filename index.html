@@ -171,7 +171,7 @@ hr{border:none;border-top:1px solid #333;margin:14px 0;}
   text-align:center;margin-top:20px;font-size:0.8rem;color:#888;
 }
 
-/* Overlay bloqueo (activación / pestaña duplicada / expiración) */
+/* Overlay bloqueo (activación / pestaña duplicada / caducidad) */
 .blocker{
   position:fixed; inset:0; z-index:99999;
   background:rgba(0,0,0,.75);
@@ -189,7 +189,7 @@ hr{border:none;border-top:1px solid #333;margin:14px 0;}
 .blocker-actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;}
 .blocker-actions button{flex:1; min-width:180px;}
 
-/* ✅ caja cambio */
+/* ✅ NUEVO: caja cambio */
 .cash-box{
   margin-top:10px;
   padding:10px;
@@ -224,13 +224,13 @@ hr{border:none;border-top:1px solid #333;margin:14px 0;}
     <button id="btnOpenMenu" class="hamburger" title="Menú">☰</button>
     <div class="view-title" id="viewTitle">VENTA / CARRITO</div>
   </div>
-  <div class="small-note">Soporte Tecnico +502 5814-0621.</div>
+  <div class="small-note">Soporte Técnico: +502 5814-0621.</div>
 </div>
 
 <div id="drawerBackdrop" class="drawer-backdrop"></div>
 <aside id="drawer" class="drawer" aria-hidden="true">
   <div class="drawer-header">
-    <div class="brand">-</div>
+    <div class="brand">MARCK BUSINESS</div>
     <button id="btnCloseMenu" class="drawer-close" title="Cerrar">✕</button>
   </div>
 
@@ -254,6 +254,7 @@ hr{border:none;border-top:1px solid #333;margin:14px 0;}
       <div class="sub-card">
         <h2>Buscar producto</h2>
 
+        <!-- ✅ NUEVO: ESCANEO POR CÓDIGO -->
         <div class="flex-row" style="margin-bottom:8px;">
           <input id="scanInput" type="text" placeholder="Escanear código de barras aquí..." class="big-input" autocomplete="off"/>
           <button id="scanAddBtn" class="add-cart-btn" title="Agregar por código">+</button>
@@ -308,6 +309,7 @@ hr{border:none;border-top:1px solid #333;margin:14px 0;}
           </div>
         </div>
 
+        <!-- ✅ NUEVO: EFECTIVO RECIBIDO + CAMBIO -->
         <div id="cashBox" class="cash-box" style="display:none;">
           <div class="cash-grid">
             <div>
@@ -341,6 +343,7 @@ hr{border:none;border-top:1px solid #333;margin:14px 0;}
     <div class="card">
       <h2>Agregar producto</h2>
 
+      <!-- ✅ NUEVO: CÓDIGO -->
       <label>Código de barras / Código</label>
       <input id="p_code" type="text" placeholder="Ej: 7501234567890" autocomplete="off"/>
 
@@ -406,6 +409,7 @@ hr{border:none;border-top:1px solid #333;margin:14px 0;}
           <div class="right"><div class="small-note">Total</div><div id="salesTotal">Q0.00</div></div>
         </div>
 
+        <!-- ✅ NUEVO: REIMPRESIÓN POR NÚMERO -->
         <div class="sub-card" style="margin-top:14px;">
           <h3>Reimprimir ticket</h3>
           <div class="flex-row">
@@ -492,29 +496,38 @@ function showBlocker({title, msgHTML, buttons, onReady}){
         ${buttons.map((b,i)=>`<button id="blkbtn_${i}" class="${b.className||''}">${escapeHtml(b.text)}</button>`).join('')}
       </div>
       <div style="margin-top:10px;color:#aaa;font-size:.85rem;">
-        Nota: el estado se guarda en este navegador. Si borras datos del navegador, se perderá.
+        Nota: la activación, caducidad y estado se guardan en este navegador. Si borras datos del navegador, se perderá.
       </div>
     </div>
   `;
-  buttons.forEach((b,i)=>{ document.getElementById(`blkbtn_${i}`).onclick = b.onClick; });
+  buttons.forEach((b,i)=>{
+    document.getElementById(`blkbtn_${i}`).onclick = b.onClick;
+  });
   if(typeof onReady === 'function') onReady();
 }
 
 /* ==========================
-   ACTIVACION SOLO 1 VEZ (22782522)
+   ACTIVACION SOLO 1 VEZ (22782522) — UI BONITA
 ========================== */
 const KEY_ACTIVATED = 'cg_activated_v1';
 const ACTIVATION_CODE = '22782522';
 
 /* ==========================
-   ✅ CADUCIDAD (3 DÍAS)
-   - desde primera apertura (trial)
-   - o desde activación
+   CADUCIDAD (3 DÍAS) + PANTALLA DE PAGO
 ========================== */
-const KEY_TRIAL_START = 'cg_trial_start_v1';
-const KEY_ACTIVATED_AT = 'cg_activated_at_v1';
-const KEY_EXPIRES_AT = 'cg_expires_at_v1';
+const KEY_TRIAL_START   = 'cg_trial_start_v1';
+const KEY_ACTIVATED_AT  = 'cg_activated_at_v1';
+const KEY_EXPIRES_AT    = 'cg_expires_at_v1';
 const EXP_DAYS = 3;
+
+// Datos a mostrar
+const PAY_SUPPORT_PHONE = '+502 5814-0621';
+const PAY_GT_LABEL = 'G&T Ahorro';
+const PAY_GT_ACCOUNT = '06280077091';
+const PAY_BAC_LABEL = 'BAC Ahorro';
+const PAY_BAC_ACCOUNT = '967336413';
+const PAY_OWNER = 'JUAN LUIS RUIZ BALCARCEL';
+const PAY_IMAGE = 'PAGOS.png';
 
 function msDays(d){ return d * 24 * 60 * 60 * 1000; }
 function setIfMissing(key, value){
@@ -523,11 +536,10 @@ function setIfMissing(key, value){
   }
 }
 function computeExpiresAt(){
-  // inicio trial al primer uso
   setIfMissing(KEY_TRIAL_START, Date.now());
 
-  const activated = localStorage.getItem(KEY_ACTIVATED) === '1';
-  const trialStart = parseInt(localStorage.getItem(KEY_TRIAL_START) || '0', 10) || Date.now();
+  const activated   = localStorage.getItem(KEY_ACTIVATED) === '1';
+  const trialStart  = parseInt(localStorage.getItem(KEY_TRIAL_START) || '0', 10) || Date.now();
   const activatedAt = parseInt(localStorage.getItem(KEY_ACTIVATED_AT) || '0', 10);
 
   const base = (activated && activatedAt) ? activatedAt : trialStart;
@@ -536,41 +548,84 @@ function computeExpiresAt(){
   localStorage.setItem(KEY_EXPIRES_AT, String(expiresAt));
   return expiresAt;
 }
-function fmtRemaining(ms){
-  if(ms <= 0) return "0h";
-  const totalMin = Math.floor(ms/60000);
-  const days = Math.floor(totalMin / (60*24));
-  const hours = Math.floor((totalMin - days*60*24) / 60);
-  const mins = totalMin % 60;
-  if(days > 0) return `${days} día(s) ${hours}h`;
-  if(hours > 0) return `${hours}h ${mins}m`;
-  return `${mins}m`;
+function showExpiredPayScreen(){
+  showBlocker({
+    title: 'VERSIÓN DE PRUEBA CADUCADA',
+    msgHTML: `
+      <p style="font-size:1.05rem;">
+        Su periodo de prueba de <b>${EXP_DAYS} días</b> ha finalizado.
+      </p>
+
+      <div style="margin-top:12px; padding:12px; border:1px solid #333; border-radius:14px; background:#0f0f0f;">
+        <div style="font-weight:800; font-size:1.05rem; color:#fff; margin-bottom:6px;">
+          Para reactivar:
+        </div>
+        <div style="color:#ddd; line-height:1.5;">
+          ✅ Comuníquese con <b>${PAY_SUPPORT_PHONE}</b><br>
+          o realice el pago a:
+        </div>
+
+        <div style="margin-top:10px; display:grid; grid-template-columns:1fr; gap:10px;">
+          <div style="border:1px solid #2a2a2a; border-radius:12px; padding:10px; background:#111;">
+            <div style="font-weight:900; color:#fff;">${PAY_GT_LABEL}</div>
+            <div style="font-size:1.2rem; font-weight:900; letter-spacing:1px; margin-top:4px;">
+              ${PAY_GT_ACCOUNT}
+            </div>
+          </div>
+
+          <div style="border:1px solid #2a2a2a; border-radius:12px; padding:10px; background:#111;">
+            <div style="font-weight:900; color:#fff;">${PAY_BAC_LABEL}</div>
+            <div style="font-size:1.2rem; font-weight:900; letter-spacing:1px; margin-top:4px;">
+              ${PAY_BAC_ACCOUNT}
+            </div>
+          </div>
+
+          <div style="border:1px dashed #333; border-radius:12px; padding:10px; background:#0c0c0c;">
+            <div style="color:#aaa; font-size:.9rem;">A nombre de:</div>
+            <div style="font-weight:900; font-size:1.05rem; color:#fff; margin-top:4px;">
+              ${PAY_OWNER}
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <img src="${PAY_IMAGE}" alt="Datos de pago"
+               style="width:100%; border-radius:14px; border:1px solid #333; display:block;"
+               onerror="this.style.display='none';">
+          <div style="color:#777; font-size:.85rem; margin-top:6px;">
+            *Si no aparece la imagen, asegúrese de tener <b>${PAY_IMAGE}</b> en la misma carpeta del sistema.
+          </div>
+        </div>
+      </div>
+    `,
+    buttons: [
+      {
+        text: 'Copiar Soporte',
+        onClick: async ()=>{
+          try{
+            await navigator.clipboard.writeText(PAY_SUPPORT_PHONE);
+            alert('Número copiado: ' + PAY_SUPPORT_PHONE);
+          }catch(e){
+            alert('No se pudo copiar. Número: ' + PAY_SUPPORT_PHONE);
+          }
+        }
+      },
+      { text:'Entendido', className:'ghost', onClick: ()=>{} }
+    ]
+  });
+
+  throw new Error("Sistema caducado");
 }
 function enforceExpiry(){
   const expiresAt = computeExpiresAt();
-  const now = Date.now();
-  const remaining = expiresAt - now;
-
-  if(remaining <= 0){
-    const expDate = new Date(expiresAt).toLocaleString();
-    showBlocker({
-      title: 'Sistema caducado',
-      msgHTML: `
-        <p>Este sistema ha caducado.</p>
-        <p><b>Caducó el:</b> ${escapeHtml(expDate)}</p>
-        <p>Comunícate con soporte para renovar la autorización.</p>
-      `,
-      buttons: [
-        { text:'Cerrar', className:'ghost', onClick: ()=>{} }
-      ]
-    });
-    throw new Error("Caducado");
+  if(Date.now() >= expiresAt){
+    showExpiredPayScreen();
   }
-
-  // (opcional) guarda un texto útil si quisieras mostrarlo en UI
-  localStorage.setItem('cg_remaining_human_v1', fmtRemaining(remaining));
 }
 
+/* ==========================
+   ACTIVACIÓN UI
+========================== */
 function enforceActivationOnce(){
   const ok = localStorage.getItem(KEY_ACTIVATED) === '1';
   if(ok) return true;
@@ -580,6 +635,7 @@ function enforceActivationOnce(){
     msgHTML: `
       <p>Este sistema requiere activación la primera vez.</p>
       <p><b>Ingresa el código para continuar:</b></p>
+
       <div style="margin-top:12px;">
         <label style="display:block;margin-bottom:6px;color:#aaa;">Código</label>
         <input id="actCodeInput" type="password"
@@ -606,11 +662,10 @@ function enforceActivationOnce(){
             return;
           }
 
-          // ✅ marcar activado + fecha activación (reinicia conteo de 3 días desde aquí)
+          // ✅ activar + setear inicio y expiración desde activación
           localStorage.setItem(KEY_ACTIVATED, '1');
           localStorage.setItem(KEY_ACTIVATED_AT, String(Date.now()));
-          // recalcular y guardar expiración desde activación
-          computeExpiresAt();
+          localStorage.setItem(KEY_EXPIRES_AT, String(Date.now() + msDays(EXP_DAYS)));
 
           const blk = document.getElementById('cg_blocker');
           if(blk) blk.remove();
@@ -646,6 +701,7 @@ const KEY_ACTIVE_PING = 'cg_active_ping_v1';
 const TAB_ID = 'TAB-' + Math.random().toString(16).slice(2) + '-' + Date.now();
 
 function nowMs(){ return Date.now(); }
+
 function isAnotherTabActive(){
   const active = localStorage.getItem(KEY_ACTIVE_TAB);
   const ping = parseInt(localStorage.getItem(KEY_ACTIVE_PING) || '0', 10);
@@ -709,7 +765,7 @@ function enforceSingleTab(){
 }
 
 /* ==========================
-   IMPRESION MISMA PESTAÑA - CARTA
+   IMPRESIÓN (CARTA)
 ========================== */
 function printHTMLSameTab({ title, bodyHTML, pageCSS, waitForLogo=true }){
   const originalBody = document.body.innerHTML;
@@ -736,9 +792,7 @@ function printHTMLSameTab({ title, bodyHTML, pageCSS, waitForLogo=true }){
     .center{ text-align:center; }
     .wrap{ word-wrap:break-word; white-space:normal; }
     .totalRow{ font-size:22px; font-weight:900; display:flex; justify-content:space-between; margin-top:12px; }
-
     @media print{ .no-print{ display:none !important; } }
-
     ${pageCSS || ''}
   `;
   document.head.appendChild(style);
@@ -749,6 +803,7 @@ function printHTMLSameTab({ title, bodyHTML, pageCSS, waitForLogo=true }){
   const doPrint = () => {
     window.focus();
     window.print();
+
     setTimeout(() => {
       document.body.innerHTML = originalBody;
       document.title = originalTitle;
@@ -853,12 +908,12 @@ let sales = JSON.parse(localStorage.getItem(KEY_SALES)||'[]');
 let ticketCounter = parseInt(localStorage.getItem(KEY_TICKET)||'1',10);
 let cart = [];
 
-/* MIGRACIÓN (incluye code) */
+/* ✅ MIGRACIÓN (incluye code) */
 products = (products || []).map(p => ({
   code: (p && (p.code !== undefined)) ? String(p.code ?? '').trim() : '',
   name: (p && p.name) ? p.name : '',
   cost: isFinite(Number(p && p.cost)) ? Number(p.cost) : 0,
-  price: isFinite(Number(p && p.price)) ? Number(p.price) : 0,
+  price: isFinite(Number(p && p.price)) ? Number(p && p.price) : 0,
   stock: Number.isFinite(parseInt(p && p.stock,10)) ? parseInt(p.stock,10) : 0
 }));
 localStorage.setItem(KEY_PRODUCTS, JSON.stringify(products));
@@ -922,7 +977,7 @@ function saveProducts(){ localStorage.setItem(KEY_PRODUCTS, JSON.stringify(produ
 function saveSales(){ localStorage.setItem(KEY_SALES, JSON.stringify(sales)); }
 function saveTicketCounter(){ localStorage.setItem(KEY_TICKET, ticketCounter.toString()); }
 
-/* EDICIÓN */
+/* ===== EDICIÓN ===== */
 let editingIndex = null;
 function resetProductForm(){
   p_code.value = '';
@@ -939,7 +994,9 @@ function resetProductForm(){
 }
 cancelEditBtn.onclick = () => resetProductForm();
 
-/* CÓDIGOS */
+/* ==========================
+   ✅ BUSQUEDA POR CÓDIGO
+========================== */
 function normalizeCode(s){ return String(s ?? '').trim(); }
 function findProductIndexByCode(code){
   const c = normalizeCode(code);
@@ -947,7 +1004,7 @@ function findProductIndexByCode(code){
   return products.findIndex(p => normalizeCode(p.code) === c);
 }
 
-/* PRODUCTOS */
+/* ===== PRODUCTOS ===== */
 function renderProducts(){
   productsList.innerHTML='';
   if(products.length===0){
@@ -1083,7 +1140,7 @@ function restockProduct(idx){
 }
 window.restockProduct = restockProduct;
 
-/* CARRITO */
+/* ===== CARRITO ===== */
 function cartTotalNumber(){
   return cart.reduce((acc,it)=> acc + (safeNumber(it.price) * safeNumber(it.qty)), 0);
 }
@@ -1155,7 +1212,9 @@ addFilterBtn.onclick = ()=>{
   const qty = parseInt(filterQty.value)||1;
 
   let idx = products.findIndex(p=>p.name.toLowerCase()===raw.toLowerCase());
-  if(idx===-1){ idx = findProductIndexByCode(raw); }
+  if(idx===-1){
+    idx = findProductIndexByCode(raw);
+  }
   if(idx===-1){ alert('Producto no encontrado'); return; }
 
   addToCart(idx, qty);
@@ -1180,7 +1239,7 @@ clearCartBtn.onclick = ()=>{
   }
 };
 
-/* EFECTIVO RECIBIDO + CAMBIO */
+/* ✅ EFECTIVO RECIBIDO + CAMBIO */
 function renderCashUI(){
   const method = (payMethodEl.value || 'EFECTIVO').toUpperCase();
   const total = cartTotalNumber();
@@ -1206,10 +1265,11 @@ function renderCashUI(){
 payMethodEl.addEventListener('change', ()=> renderCashUI());
 cashReceivedEl.addEventListener('input', ()=> renderCashUI());
 
-/* REGISTRO DIARIO */
+/* ===== REGISTRO DIARIO ===== */
 function salesOfDay(dayKey){
   return sales.filter(s => (s.dayKey || dateKeyFromDate(s.date)) === dayKey);
 }
+
 function computeDayTotals(dayKey){
   const daySales = salesOfDay(dayKey);
   let total=0;
@@ -1227,6 +1287,7 @@ function computeDayTotals(dayKey){
   const profit = total - totalCost;
   return { count: daySales.length, total, totalCost, profit, byMethod, daySales };
 }
+
 function renderSales(){
   const dayKey = salesDateEl.value || todayKey();
   const { count, total, daySales } = computeDayTotals(dayKey);
@@ -1264,7 +1325,11 @@ function renderSales(){
   salesCount.textContent = count;
   salesTotal.textContent = formatQ(total);
 }
-(function initDate(){ salesDateEl.value = todayKey(); })();
+
+(function initDate(){
+  salesDateEl.value = todayKey();
+})();
+
 salesDateEl.addEventListener('change', ()=>{ renderSales(); renderCloseResult(); });
 
 deleteSalesBtn.onclick = ()=>{
@@ -1276,7 +1341,9 @@ deleteSalesBtn.onclick = ()=>{
   } else { alert("Código incorrecto"); }
 };
 
-/* EXPORT INVENTARIO */
+/* ==========================
+   EXPORTS CARTA (Inventario / Ventas)
+========================== */
 exportProductsBtn.onclick = ()=>{
   const rows = products.map(p => `
     <tr>
@@ -1306,10 +1373,10 @@ exportProductsBtn.onclick = ()=>{
       <tbody>${rows || `<tr><td colspan="5" class="center">No hay productos</td></tr>`}</tbody>
     </table>
   `;
+
   printHTMLSameTab({ title:'Inventario', bodyHTML, pageCSS:'', waitForLogo:true });
 };
 
-/* EXPORT VENTAS DÍA */
 exportDailyBtn.onclick = ()=>{
   const dayKey = salesDateEl.value || todayKey();
   const { daySales, total, byMethod, totalCost, profit } = computeDayTotals(dayKey);
@@ -1361,16 +1428,18 @@ exportDailyBtn.onclick = ()=>{
       <tbody>${rows || `<tr><td colspan="7" class="center">No hay ventas</td></tr>`}</tbody>
     </table>
   `;
+
   printHTMLSameTab({ title:`Ventas_${dayKey}`, bodyHTML, pageCSS:'', waitForLogo:true });
 };
 
-/* COBRO + TICKET */
+/* ===== COBRO + TICKET (CARTA) ===== */
 payBtn.onclick = ()=>{
   if(cart.length===0){ alert('Carrito vacío'); return; }
 
   const client = clientNameEl.value.trim();
   const method = (payMethodEl.value || 'EFECTIVO').toUpperCase();
   const currentTicket = ticketCounter;
+
   const dayKey = salesDateEl.value || todayKey();
 
   let totalVenta=0;
@@ -1431,6 +1500,11 @@ payBtn.onclick = ()=>{
   renderCart();
   renderSales();
   renderCloseResult();
+
+  // limpiar caja efectivo + cliente
+  clientNameEl.value = '';
+  cashReceivedEl.value = '';
+  renderCashUI();
 
   generateTicketPDF({
     items: ventaItems,
@@ -1504,7 +1578,7 @@ function generateTicketPDF({items,total,client,ticketNo,method,saleDateISO,cashR
   printHTMLSameTab({ title:`Ticket_${ticketNo}`, bodyHTML, pageCSS:'', waitForLogo:true });
 }
 
-/* REIMPRESIÓN */
+/* ✅ REIMPRESIÓN */
 function findSaleByTicket(ticketNo){
   const t = parseInt(ticketNo, 10);
   if(!Number.isFinite(t)) return null;
@@ -1528,156 +1602,133 @@ function reprintTicket(ticketNo){
 window.reprintTicket = reprintTicket;
 
 reprintBtn.onclick = ()=>{
-  const t = reprintTicketNoEl.value;
-  if(!t){ alert('Ingresa un número de ticket.'); return; }
-  reprintTicket(t);
+  const n = reprintTicketNoEl.value;
+  if(!n){ alert('Ingresa el número de ticket'); return; }
+  reprintTicket(n);
 };
-reprintTicketNoEl.addEventListener('keydown', (e)=>{
-  if(e.key === 'Enter'){
-    e.preventDefault();
-    reprintBtn.click();
-  }
-});
 
-/* CIERRE */
-function calculateClose(){
-  const dayKey = salesDateEl.value || todayKey();
-  const counted = {
-    EFECTIVO: safeNumber(closeCashEl.value),
-    TARJETA: safeNumber(closeCardEl.value),
-    TRANSFERENCIA: safeNumber(closeTransferEl.value)
-  };
-
-  const computed = computeDayTotals(dayKey);
-  const expected = computed.byMethod;
-
-  const diff = {
-    EFECTIVO: counted.EFECTIVO - safeNumber(expected.EFECTIVO),
-    TARJETA: counted.TARJETA - safeNumber(expected.TARJETA),
-    TRANSFERENCIA: counted.TRANSFERENCIA - safeNumber(expected.TRANSFERENCIA)
-  };
-
-  const totalExpected = safeNumber(expected.EFECTIVO)+safeNumber(expected.TARJETA)+safeNumber(expected.TRANSFERENCIA);
-  const totalCounted = counted.EFECTIVO+counted.TARJETA+counted.TRANSFERENCIA;
-  const totalDiff = totalCounted - totalExpected;
-
-  return {
-    dayKey,
-    counted,
-    expected,
-    diff,
-    totalExpected,
-    totalCounted,
-    totalDiff,
-    totalCost: safeNumber(computed.totalCost),
-    profit: safeNumber(computed.profit),
-    note: (closeNoteEl.value||'').trim()
-  };
-}
+/* ==========================
+   CIERRE DE CAJA (cuadre)
+========================== */
 function renderCloseResult(){
-  const r = calculateClose();
-  const sign = (n)=> n>0 ? `+${formatQ(n)}` : formatQ(n);
+  const dayKey = salesDateEl.value || todayKey();
+  const { total, byMethod } = computeDayTotals(dayKey);
+
+  const countedCash = safeNumber(closeCashEl.value);
+  const countedCard = safeNumber(closeCardEl.value);
+  const countedTransfer = safeNumber(closeTransferEl.value);
+
+  const expectedCash = safeNumber(byMethod.EFECTIVO);
+  const expectedCard = safeNumber(byMethod.TARJETA);
+  const expectedTransfer = safeNumber(byMethod.TRANSFERENCIA);
+
+  const diffCash = countedCash - expectedCash;
+  const diffCard = countedCard - expectedCard;
+  const diffTransfer = countedTransfer - expectedTransfer;
+
+  const countedTotal = countedCash + countedCard + countedTransfer;
+  const expectedTotal = expectedCash + expectedCard + expectedTransfer;
+  const diffTotal = countedTotal - expectedTotal;
+
+  const note = closeNoteEl.value.trim();
 
   closeResultEl.innerHTML = `
-    <div><strong>Esperado:</strong> ${formatQ(r.totalExpected)} | <strong>Contado:</strong> ${formatQ(r.totalCounted)} | <strong>Diferencia:</strong> ${sign(r.totalDiff)}</div>
-    <div style="margin-top:6px;">
-      <span class="pill">EFECTIVO ${sign(r.diff.EFECTIVO)}</span>
-      <span class="pill">TARJETA ${sign(r.diff.TARJETA)}</span>
-      <span class="pill">TRANSFERENCIA ${sign(r.diff.TRANSFERENCIA)}</span>
-    </div>
-    <div style="margin-top:10px;">
-      <div><strong>Costo vendido (día):</strong> ${formatQ(r.totalCost)}</div>
-      <div><strong>Ganancia bruta (día):</strong> ${formatQ(r.profit)}</div>
+    <div style="margin-top:8px;">
+      <div><b>Ventas del día:</b> ${formatQ(total)}</div>
+      <div style="margin-top:6px;"><b>Esperado:</b>
+        Efectivo ${formatQ(expectedCash)} | Tarjeta ${formatQ(expectedCard)} | Transferencia ${formatQ(expectedTransfer)}
+      </div>
+      <div style="margin-top:6px;"><b>Contado:</b>
+        Efectivo ${formatQ(countedCash)} | Tarjeta ${formatQ(countedCard)} | Transferencia ${formatQ(countedTransfer)}
+      </div>
+      <div style="margin-top:10px;"><b>Diferencias:</b></div>
+      <div>Efectivo: <b>${formatQ(diffCash)}</b> | Tarjeta: <b>${formatQ(diffCard)}</b> | Transferencia: <b>${formatQ(diffTransfer)}</b></div>
+      <div style="margin-top:6px;">Total contado: <b>${formatQ(countedTotal)}</b> | Total esperado: <b>${formatQ(expectedTotal)}</b></div>
+      <div style="margin-top:6px;">Diferencia total: <b>${formatQ(diffTotal)}</b></div>
+      ${note ? `<div style="margin-top:8px;"><b>Nota:</b> ${escapeHtml(note)}</div>` : ``}
     </div>
   `;
 }
-calcCloseBtn.onclick = renderCloseResult;
+calcCloseBtn.onclick = ()=> renderCloseResult();
+closeCashEl.addEventListener('input', renderCloseResult);
+closeCardEl.addEventListener('input', renderCloseResult);
+closeTransferEl.addEventListener('input', renderCloseResult);
+closeNoteEl.addEventListener('input', renderCloseResult);
 
 printCloseBtn.onclick = ()=>{
-  const r = calculateClose();
-  generateCloseTicketPDF(r);
-};
+  const dayKey = salesDateEl.value || todayKey();
+  const { total, byMethod, totalCost, profit } = computeDayTotals(dayKey);
 
-function generateCloseTicketPDF(r){
-  const sign = (n)=> n>0 ? `+${formatQ(n)}` : formatQ(n);
+  const countedCash = safeNumber(closeCashEl.value);
+  const countedCard = safeNumber(closeCardEl.value);
+  const countedTransfer = safeNumber(closeTransferEl.value);
+
+  const expectedCash = safeNumber(byMethod.EFECTIVO);
+  const expectedCard = safeNumber(byMethod.TARJETA);
+  const expectedTransfer = safeNumber(byMethod.TRANSFERENCIA);
+
+  const diffCash = countedCash - expectedCash;
+  const diffCard = countedCard - expectedCard;
+  const diffTransfer = countedTransfer - expectedTransfer;
+
+  const countedTotal = countedCash + countedCard + countedTransfer;
+  const expectedTotal = expectedCash + expectedCard + expectedTransfer;
+  const diffTotal = countedTotal - expectedTotal;
+
+  const note = closeNoteEl.value.trim();
 
   const bodyHTML = `
     <img class="p-logo" src="LOGO1.png" onerror="this.style.display='none'">
-    <div class="p-title">CIERRE DE CAJA</div>
-    <div class="p-sub">${escapeHtml(r.dayKey)}</div>
-
-    <div class="p-meta"><b>Generado:</b> ${escapeHtml(new Date().toLocaleString())}</div>
+    <div class="p-title">Cierre de caja</div>
+    <div class="p-sub">${escapeHtml(dayKey)} — ${escapeHtml(new Date().toLocaleString())}</div>
 
     <div class="p-hr"></div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Forma</th>
-          <th class="right">Esperado</th>
-          <th class="right">Contado</th>
-          <th class="right">Dif</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>EFECTIVO</td>
-          <td class="right">${formatQ(r.expected.EFECTIVO)}</td>
-          <td class="right">${formatQ(r.counted.EFECTIVO)}</td>
-          <td class="right">${escapeHtml(sign(r.diff.EFECTIVO))}</td>
-        </tr>
-        <tr>
-          <td>TARJETA</td>
-          <td class="right">${formatQ(r.expected.TARJETA)}</td>
-          <td class="right">${formatQ(r.counted.TARJETA)}</td>
-          <td class="right">${escapeHtml(sign(r.diff.TARJETA))}</td>
-        </tr>
-        <tr>
-          <td>TRANSFERENCIA</td>
-          <td class="right">${formatQ(r.expected.TRANSFERENCIA)}</td>
-          <td class="right">${formatQ(r.counted.TRANSFERENCIA)}</td>
-          <td class="right">${escapeHtml(sign(r.diff.TRANSFERENCIA))}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="p-meta"><b>Total ventas:</b> ${formatQ(total)}</div>
+    <div class="p-meta"><b>Costo vendido:</b> ${formatQ(totalCost)} &nbsp; | &nbsp; <b>Ganancia bruta:</b> ${formatQ(profit)}</div>
 
     <div class="p-hr"></div>
 
-    <div class="p-meta"><b>Total esperado:</b> ${formatQ(r.totalExpected)}</div>
-    <div class="p-meta"><b>Total contado:</b> ${formatQ(r.totalCounted)}</div>
-    <div class="p-meta"><b>Diferencia total:</b> ${escapeHtml(sign(r.totalDiff))}</div>
+    <div class="p-meta"><b>Esperado:</b> Efectivo ${formatQ(expectedCash)} | Tarjeta ${formatQ(expectedCard)} | Transferencia ${formatQ(expectedTransfer)}</div>
+    <div class="p-meta"><b>Contado:</b> Efectivo ${formatQ(countedCash)} | Tarjeta ${formatQ(countedCard)} | Transferencia ${formatQ(countedTransfer)}</div>
 
     <div class="p-hr"></div>
 
-    <div class="p-meta"><b>Costo vendido:</b> ${formatQ(r.totalCost)}</div>
-    <div class="p-meta"><b>Ganancia bruta:</b> ${formatQ(r.profit)}</div>
+    <div class="p-meta"><b>Diferencias:</b> Efectivo ${formatQ(diffCash)} | Tarjeta ${formatQ(diffCard)} | Transferencia ${formatQ(diffTransfer)}</div>
+    <div class="p-meta"><b>Total contado:</b> ${formatQ(countedTotal)} &nbsp; | &nbsp; <b>Total esperado:</b> ${formatQ(expectedTotal)}</div>
+    <div class="p-meta"><b>Diferencia total:</b> ${formatQ(diffTotal)}</div>
 
-    ${r.note ? `<div class="p-hr"></div><div class="p-meta wrap"><b>Obs:</b> ${escapeHtml(r.note)}</div>` : ``}
+    ${note ? `<div class="p-hr"></div><div class="p-meta"><b>Nota:</b> ${escapeHtml(note)}</div>` : ``}
 
     <div class="p-hr"></div>
-    <div class="center" style="font-size:18px;font-weight:700;">Cierre de caja</div>
+    <div class="center" style="font-size:16px;">MarckBusiness © 2026</div>
   `;
-  printHTMLSameTab({ title:`Cierre_${r.dayKey}`, bodyHTML, pageCSS:'', waitForLogo:true });
-}
+
+  printHTMLSameTab({ title:`Cierre_${dayKey}`, bodyHTML, pageCSS:'', waitForLogo:true });
+};
 
 /* ==========================
-   ✅ INIT (orden correcto)
-   1) Caducidad
-   2) Activación
-   3) Una sola pestaña
-   4) Render app
+   INICIALIZACIÓN: activar, caducar, 1 pestaña, render
 ========================== */
-enforceExpiry();
-enforceActivationOnce();
-enforceSingleTab();
+(function boot(){
+  // 1) Solo una pestaña
+  enforceSingleTab();
 
-renderProducts();
-renderCart();
-renderSales();
-renderCloseResult();
-resetProductForm();
+  // 2) Activación una vez
+  enforceActivationOnce();
 
-try{ setTimeout(()=>{ if(scanInput) scanInput.focus(); }, 200); }catch(e){}
+  // 3) Caducidad 3 días
+  enforceExpiry();
+
+  // 4) Render inicial
+  renderProducts();
+  renderCart();
+  renderSales();
+  renderCloseResult();
+
+  // Focus al escáner
+  setTimeout(()=>{ try{ scanInput.focus(); }catch(e){} }, 200);
+})();
 </script>
 
 </body>
