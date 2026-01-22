@@ -496,7 +496,6 @@ function showBlocker({title, msgHTML, buttons, onReady}){
         ${buttons.map((b,i)=>`<button id="blkbtn_${i}" class="${b.className||''}">${escapeHtml(b.text)}</button>`).join('')}
       </div>
       <div style="margin-top:10px;color:#aaa;font-size:.85rem;">
-        Nota: la activación, caducidad y estado se guardan en este navegador. Si borras datos del navegador, se perderá.
       </div>
     </div>
   `;
@@ -593,7 +592,7 @@ function showExpiredPayScreen(){
                style="width:100%; border-radius:14px; border:1px solid #333; display:block;"
                onerror="this.style.display='none';">
           <div style="color:#777; font-size:.85rem; margin-top:6px;">
-            *Si no aparece la imagen, asegúrese de tener <b>${PAY_IMAGE}</b> en la misma carpeta del sistema.
+            <b>${PAY_IMAGE}</b> 
           </div>
         </div>
       </div>
